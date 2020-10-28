@@ -1,0 +1,3 @@
+class Toyota extends Car {
+}
+

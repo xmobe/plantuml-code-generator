@@ -7,27 +7,38 @@ var os = require("os");
 
 var options = {
   language: "coffeescript",
-  output: null
+  output: null,
 };
 
-var supported_languages = ["coffeescript", "csharp", "ecmascript5", "ecmascript6", "java", "php", "python", "ruby", "typescript","swift"];
+var supported_languages = [
+  "coffeescript",
+  "csharp",
+  "ecmascript5",
+  "ecmascript6",
+  "java",
+  "php",
+  "python",
+  "ruby",
+  "typescript",
+  "swift",
+];
 
 var args = process.argv.slice(2); // Trim "node" and the script path.
 
-hbs.registerHelper('if_ne', function(a, b, opts) {
-    if (a() != b) {
-        return opts.fn(this);
-    } else {
-        return opts.inverse(this);
-    }
+hbs.registerHelper("if_ne", function (a, b, opts) {
+  if (a() != b) {
+    return opts.fn(this);
+  } else {
+    return opts.inverse(this);
+  }
 });
 
 // sReturnType Check
-hbs.registerHelper('if_ne2', function(a, b, opts) {
+hbs.registerHelper("if_ne2", function (a, b, opts) {
   if (a["sReturnType"] != b) {
-      return opts.fn(this);
+    return opts.fn(this);
   } else {
-      return opts.inverse(this);
+    return opts.inverse(this);
   }
 });
 
@@ -40,23 +51,37 @@ if (args.length === 0) {
 function printLanguages() {
   supported_languages.forEach(function (item) {
     console.log(item);
-  })
+  });
   exitSuccess();
 }
 
 function printUsage() {
   console.log("Usage: plantcode [options] <inputFile>");
   console.log("");
-  console.log("Generates classfile(s) for the provided PlantUML file specified by <input_file> and writes to standard output.");
+  console.log(
+    "Generates classfile(s) for the provided PlantUML file specified by <input_file> and writes to standard output."
+  );
   console.log("");
   console.log("Options:");
-  console.log("  -l, --language <language>          name of the programming language");
-  console.log("                                     which the produced class files")
+  console.log(
+    "  -l, --language <language>          name of the programming language"
+  );
+  console.log(
+    "                                     which the produced class files"
+  );
   console.log("                                     will be written in");
-  console.log("  -o, --out <output_path>            the path to output the file(s) to");
-  console.log("      --show-languages               displays all the current supported");
-  console.log("                                     programming languages for use")
-  console.log("                                     for with the language option");
+  console.log(
+    "  -o, --out <output_path>            the path to output the file(s) to"
+  );
+  console.log(
+    "      --show-languages               displays all the current supported"
+  );
+  console.log(
+    "                                     programming languages for use"
+  );
+  console.log(
+    "                                     for with the language option"
+  );
   console.log("  -h, --help                         print help and exit");
   exitSuccess();
 }
@@ -66,7 +91,6 @@ function isValidLanguage(language) {
 }
 
 function getArguments() {
-
   while (args.length > 0 && isOption(args[0])) {
     switch (args[0]) {
       case "-o":
@@ -104,17 +128,15 @@ function getArguments() {
   switch (args.length) {
     case 1:
       options.input = args[0];
-    break;
+      break;
     default:
       abort("No input file provided.");
   }
 
   return options;
-
 }
 
 function convertFile(config) {
-
   fs.readFile(config.input, { encoding: "UTF-8" }, function (err, data) {
     if (err === null) {
       processInputFile(config, data);
@@ -122,7 +144,6 @@ function convertFile(config) {
       console.error("Unable to read input file.");
     }
   });
-
 }
 
 function exitFailure() {
@@ -141,7 +162,7 @@ function abort(message) {
 }
 
 function isOption(arg) {
-  return (/^-/).test(arg);
+  return /^-/.test(arg);
 }
 
 function nextArg() {
@@ -151,54 +172,107 @@ function nextArg() {
 function processInputFile(config, data) {
   try {
     var aUMLBlocks = parser.parse(data);
-  } catch(e) {
+  } catch (e) {
     abort("Error parsing input file: ", config.input, e);
   }
-  fs.readFile("templates/" + config.language + ".hbs", { encoding: "UTF-8" }, function (err, data) {
-    if (err === null) {
-      processTemplateFile(config, data, aUMLBlocks);
-    } else {
-      abort("Unable to read template file for " + config.language + ".");
+  fs.readFile(
+    "templates/" + config.language + ".hbs",
+    { encoding: "UTF-8" },
+    function (err, data) {
+      if (err === null) {
+        processTemplateFile(config, data, aUMLBlocks);
+      } else {
+        abort("Unable to read template file for " + config.language + ".");
+      }
     }
-  });
+  );
 }
 
 function processTemplateFile(config, templateData, dictionary) {
-
   var template = hbs.compile(templateData);
 
   var output = "";
 
   dictionary.forEach(function (element) {
     element.getClasses().forEach(function (element) {
-      output += template(element, {
-        allowedProtoMethods: {
-         "getExtends": true,
-         "getFields": true,
-         "getFullName": true,
-         "getKeyword": true,
-         "getMethods": true,
-         "getName": true,
-         "getParameters": true,
-         "getReturnType": true,
-         "hasFields": true,
-         "hasMethods": true,
-         "needsReturnStatement": true
-        }
-      }) + os.EOL + os.EOL;
-    })
-  })
+      output +=
+        template(element, {
+          allowedProtoMethods: {
+            getExtends: true,
+            getFields: true,
+            getFullName: true,
+            getKeyword: true,
+            getMethods: true,
+            getName: true,
+            getParameters: true,
+            getReturnType: true,
+            hasFields: true,
+            hasMethods: true,
+            needsReturnStatement: true,
+          },
+        }) +
+        os.EOL +
+        os.EOL;
 
-  if (config.output === null) {
+      const resultClass =
+        template(element, {
+          allowedProtoMethods: {
+            getExtends: true,
+            getFields: true,
+            getFullName: true,
+            getKeyword: true,
+            getMethods: true,
+            getName: true,
+            getParameters: true,
+            getReturnType: true,
+            hasFields: true,
+            hasMethods: true,
+            needsReturnStatement: true,
+          },
+        }) +
+        os.EOL +
+        os.EOL;
+
+      // console.log("================ Element ================");
+      // console.log(element);
+      // console.log("================ Class ================");
+      // console.log(resultClass);
+
+      if (element.interfaceName) {
+        const interfaceFileName = `${element.interfaceName.toLowerCase()}.interface.ts`;
+        console.log(`create interface ${interfaceFileName}`);
+        writeFile(config, interfaceFileName, resultClass);
+      }
+
+      if (element.className) {
+        const classFileName = `${element.className.toLowerCase()}.ts`;
+        console.log(`create class ${classFileName}`);
+        writeFile(config, classFileName, resultClass);
+      }
+    });
+  });
+
+  // if (config.output === null) {
+  //   console.log(output);
+  // } else {
+  //   fs.writeFile(config.output, output, function (err) {
+  //     if (err !== null) {
+  //       abort("Unable to write output file for " + config.output + ".");
+  //     }
+  //   });
+  // }
+}
+
+function writeFile(configPath, fileName, output) {
+  if (configPath.output === null) {
     console.log(output);
   } else {
-    fs.writeFile(config.output, output, function (err) {
+    fs.writeFile(configPath.output + "/" + fileName, output, function (err) {
       if (err !== null) {
-        abort("Unable to write output file for " + config.output + ".");
+        abort("Unable to write output file for " + configPath.output + ".");
       }
-    })
+    });
   }
-
 }
 
 // Workaround for an apparent bug in Handlebars: functions are not called with the parent scope
@@ -216,8 +290,8 @@ function processTemplateFile(config, templateData, dictionary) {
 // {{#each getFields}}
 //   {{#call ../this ../getFullName}}
 // {{/each}}
-hbs.registerHelper('call', function (context, member, options) {
-   return member.call(context);
+hbs.registerHelper("call", function (context, member, options) {
+  return member.call(context);
 });
 
 exports.convertFile = convertFile;

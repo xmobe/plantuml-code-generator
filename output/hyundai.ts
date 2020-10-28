@@ -1,0 +1,3 @@
+class Hyundai extends Car {
+}
+

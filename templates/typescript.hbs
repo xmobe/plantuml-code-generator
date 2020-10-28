@@ -1,7 +1,13 @@
 {{getKeyword}} {{getFullName}}{{#if getExtends}} extends {{#with getExtends}}{{getFullName}}{{/with}}{{/if}} {
-{{#each getFields}}
-  private {{this.getName}} : {{this.getReturnType}};
-{{/each}}
+{{#if_ne getKeyword "interface"}}
+  {{#each getFields}}
+  private {{this.getName}}: {{this.getReturnType}};
+  {{/each}}
+{{else}}
+  {{#each getFields}}
+  {{this.getName}}?: {{this.getReturnType}};
+  {{/each}}
+{{/if_ne}}
 {{#each getMethods}}
   {{this.getName}}{{#if this.getParameters}}({{#each this.getParameters}}{{#if @first}}{{else}},{{/if}}{{#if this.getName}}{{this.getName}}{{else}}param{{@index}}{{/if}}{{/each}}){{else}}(){{/if}} {
     return;

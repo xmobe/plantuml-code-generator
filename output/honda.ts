@@ -1,0 +1,3 @@
+class Honda extends Car {
+}
+
